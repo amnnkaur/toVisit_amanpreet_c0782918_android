@@ -11,6 +11,10 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.Spinner;
+import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -24,6 +28,8 @@ import com.lambton.tovisit_amanpreet_c0782918_android.R;
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
 
     private GoogleMap mMap;
+
+    Spinner mapType;
 
     private static final int REQUEST_CODE = 1;
     private static final String TAG = "MapsActivity";
@@ -42,6 +48,41 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+
+        optionsMapType();
+    }
+
+    private void optionsMapType() {
+
+        mapType = findViewById(R.id.spinnerMapType);
+
+        mapType.setOnItemSelectedListener((new AdapterView.OnItemSelectedListener(){
+
+                    @Override
+                    public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                        switch (i) {
+                            case 0:
+                                mMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
+                                break;
+                            case 1:
+                                mMap.setMapType(GoogleMap.MAP_TYPE_HYBRID);
+                                break;
+                            case 2:
+                                mMap.setMapType(GoogleMap.MAP_TYPE_TERRAIN);
+                                break;
+                            case 3:
+                                mMap.setMapType(GoogleMap.MAP_TYPE_SATELLITE);
+                                break;
+                            default:
+                                break;
+                        }
+                    }
+
+                    @Override
+                    public void onNothingSelected(AdapterView<?> adapterView) {
+
+                    }
+         }));
     }
 
     /**
@@ -56,6 +97,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
+        mMap.getUiSettings().setZoomControlsEnabled(true);
+        mMap.getUiSettings().isMyLocationButtonEnabled();
 
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         locationListener = new LocationListener() {
@@ -87,6 +130,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     }
 
+
+
     private void startUpdateLocations() {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             // TODO: Consider calling
@@ -98,10 +143,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             // for ActivityCompat#requestPermissions for more details.
             return;
         }
-        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 5000, 0, locationListener);
 
-//        Location lastKnownLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-//        setHomeMarker(lastKnownLocation);
+        mMap.setMyLocationEnabled(true);
+        Location location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+        if (location != null)
+        {
+            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(location.getLatitude(), location.getLongitude()), 15.0f));
+        }
+
     }
 
     private void requestLocationPermission() {
@@ -113,13 +162,21 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
 
-    @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
 
-        if (REQUEST_CODE == requestCode) {
-            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-                locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 5000, 0, locationListener);
+        if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                // TODO: Consider calling
+                //    ActivityCompat#requestPermissions
+                // here to request the missing permissions, and then overriding
+                //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+                //                                          int[] grantResults)
+                // to handle the case where the user grants the permission. See the documentation
+                // for ActivityCompat#requestPermissions for more details.
+                return;
             }
+            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
         }
     }
 

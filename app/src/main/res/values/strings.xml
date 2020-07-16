@@ -1,4 +1,12 @@
 <resources>
     <string name="app_name">toVisit_amanpreet_c0782918_android</string>
     <string name="title_activity_maps">Map</string>
+
+    <string-array name="types_of_maps">
+        <item>Default</item>
+        <item>Hybrid</item>
+        <item>Terrain</item>
+        <item>Satellite</item>
+    </string-array>
+
 </resources>
