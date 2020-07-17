@@ -14,7 +14,6 @@ public class VolleySingleton {
     private VolleySingleton(Context context) {
         ctx = context;
         requestQueue = getRequestQueue();
-
     }
 
     public static synchronized VolleySingleton getInstance(Context context) {

@@ -16,7 +16,7 @@ import java.util.HashMap;
 import java.util.List;
 
 public class GetByVolley {
-    public static void getDirection(JSONObject jsonObject, GoogleMap googleMap, Location location){
+    public static void getDirection(JSONObject jsonObject, GoogleMap googleMap, Location location) {
         HashMap<String, String> distances = null;
         VolleyParser directionParser = new VolleyParser();
         distances = directionParser.parseDistance(jsonObject);
@@ -25,43 +25,41 @@ public class GetByVolley {
         String duration = distances.get("duration");
 
         String[] directionsList;
-        directionsList = directionParser.parseDirection(jsonObject);
+        directionsList = directionParser.parseDirections(jsonObject);
         displayDirection(directionsList, distance, duration, googleMap, location);
     }
 
-    private static void displayDirection(String[] directionsList, String distance, String duration,  GoogleMap googleMap, Location location) {
+    private static void displayDirection(String[] directionsList, String distance, String duration, GoogleMap googleMap, Location location) {
         googleMap.clear();
         LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
         MarkerOptions options = new MarkerOptions().position(latLng)
-                .title("Duration: " + duration)
-                .snippet("Distance: " + distance)
+                .title("Duration : " + duration)
+                .snippet("Distance : " + distance)
                 .draggable(true);
         googleMap.addMarker(options);
-        for(int i=0; i<directionsList.length; i++){
-            PolylineOptions polygonOptions = new PolylineOptions()
+        for (int i=0; i<directionsList.length; i++) {
+            PolylineOptions polylineOptions = new PolylineOptions()
                     .color(Color.RED)
-                    .width(18)
+                    .width(10)
                     .addAll(PolyUtil.decode(directionsList[i]));
-            googleMap.addPolyline(polygonOptions);
+            googleMap.addPolyline(polylineOptions);
         }
     }
 
-    public static void nearByPlaces(JSONObject jsonObject, GoogleMap googleMap){
-        List<HashMap<String,String>> nearbyPlaces = null;
+    public static void getNearbyPlaces(JSONObject jsonObject, GoogleMap googleMap) {
+        List<HashMap<String, String>> nearbyPlaces = null;
         VolleyParser dataParser = new VolleyParser();
         nearbyPlaces = dataParser.parsePlace(jsonObject);
         showNearbyPlaces(nearbyPlaces, googleMap);
-
     }
 
-    private static void showNearbyPlaces(List<HashMap<String, String>> nearbyPlaces,  GoogleMap googleMap) {
+    private static void showNearbyPlaces(List<HashMap<String, String>> nearbyPlaces, GoogleMap googleMap) {
         googleMap.clear();
-        for(int i=0; i<nearbyPlaces.size(); i++){
-            HashMap<String,String> googlePlace = nearbyPlaces.get(i);
-            String placeName = googlePlace.get("placeName");
+        for (int i=0; i<nearbyPlaces.size(); i++) {
+            HashMap<String, String> googlePlace = nearbyPlaces.get(i);
+            String placeName = googlePlace.get("place_name");
             String vicinity = googlePlace.get("vicinity");
-            String refernce = googlePlace.get("reference");
-            double lat = Double.parseDouble(googlePlace.get("latitiude"));
+            double lat = Double.parseDouble(googlePlace.get("latitude"));
             double lng = Double.parseDouble(googlePlace.get("longitude"));
 
             LatLng latLng = new LatLng(lat, lng);
