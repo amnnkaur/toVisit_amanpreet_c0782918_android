@@ -3,6 +3,7 @@ package com.lambton.tovisit_amanpreet_c0782918_android.activity;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.DividerItemDecoration;
+import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -13,6 +14,7 @@ import android.view.MenuItem;
 import android.view.inputmethod.EditorInfo;
 import android.widget.SearchView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.lambton.tovisit_amanpreet_c0782918_android.R;
 import com.lambton.tovisit_amanpreet_c0782918_android.adapter.FavListAdapter;
@@ -28,6 +30,7 @@ public class FavouriteListActivity extends AppCompatActivity {
 
     private FavPlaceRoomDB favPlaceRoomDB;
     FavListAdapter favListAdapter;
+    FavPlace favPlace;
 
     List<FavPlace> favPlaceList;
 
@@ -43,11 +46,34 @@ public class FavouriteListActivity extends AppCompatActivity {
         rvFavList.setAdapter(favListAdapter);
 
         favPlaceList = new ArrayList<>();
-        favPlaceRoomDB = favPlaceRoomDB.getINSTANCE(this);
+        favPlaceRoomDB = FavPlaceRoomDB.getINSTANCE(this);
 
         loadPlaces();
 
+        ItemTouchHelper.SimpleCallback simpleItemTouchCallback = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT) {
+            @Override
+            public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
+                return false;
+            }
+
+            @Override
+            public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
+                int position = viewHolder.getAdapterPosition();
+                favPlaceRoomDB.favPlaceDao().deletePlace(favPlace.getPlaceID());
+//                favPlaceList.remove(position);
+                loadPlaces();
+                favListAdapter.notifyDataSetChanged();
+
+//              Toast.makeText(FavouriteListActivity.this, "swipe", Toast.LENGTH_SHORT).show();
+            }
+        };
+
+        ItemTouchHelper itemTouchHelper = new ItemTouchHelper(simpleItemTouchCallback);
+        itemTouchHelper.attachToRecyclerView(rvFavList);
+
     }
+
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -81,7 +107,6 @@ public class FavouriteListActivity extends AppCompatActivity {
 
             Intent intent = new Intent(FavouriteListActivity.this, MainActivity.class);
             startActivity(intent);
-
         }
         return super.onOptionsItemSelected(item);
     }

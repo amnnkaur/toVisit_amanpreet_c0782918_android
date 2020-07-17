@@ -1,6 +1,8 @@
 package com.lambton.tovisit_amanpreet_c0782918_android.activity;
 
 import android.Manifest;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.location.Address;
 import android.location.Geocoder;
@@ -14,6 +16,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
 
@@ -29,8 +32,12 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.lambton.tovisit_amanpreet_c0782918_android.IPassData;
 import com.lambton.tovisit_amanpreet_c0782918_android.R;
+import com.lambton.tovisit_amanpreet_c0782918_android.database.FavPlace;
+import com.lambton.tovisit_amanpreet_c0782918_android.database.FavPlaceRoomDB;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -44,8 +51,9 @@ public class MapsFragment extends Fragment implements GoogleMap.OnMarkerDragList
     FusedLocationProviderClient mClient;
 
     GoogleMap mMap;
+    FavPlaceRoomDB favPlaceRoomDB;
 
-    LatLng userLocation;
+    LatLng addedLocation;
 
     public GoogleMap getmMap() {
         return mMap;
@@ -57,6 +65,8 @@ public class MapsFragment extends Fragment implements GoogleMap.OnMarkerDragList
 
     LatLng destLocation;
     Location destination;
+    Double dest_lat, dest_lng;
+    boolean onMarkerClick = false;
 
     private OnMapReadyCallback callback = new OnMapReadyCallback() {
 
@@ -71,6 +81,8 @@ public class MapsFragment extends Fragment implements GoogleMap.OnMarkerDragList
          */
         @Override
         public void onMapReady(final GoogleMap googleMap) {
+
+            favPlaceRoomDB = FavPlaceRoomDB.getINSTANCE(getActivity());
 
             if (ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                 return;
@@ -97,16 +109,94 @@ public class MapsFragment extends Fragment implements GoogleMap.OnMarkerDragList
             googleMap.setOnMapLongClickListener(new GoogleMap.OnMapLongClickListener() {
                 @Override
                 public void onMapLongClick(LatLng latLng) {
-                    destLocation = latLng;
-                    destination = new Location("Your destination");
-                    destination.setLatitude(latLng.latitude);
-                    destination.setLongitude(latLng.longitude);
-//                    setMarker(destLocation);
-                    setMarker(destination);
+                    Location location = new Location("Your destination");
+                    location.setLatitude(latLng.latitude);
+                    location.setLongitude(latLng.longitude);
+
+                    dest_lat = latLng.latitude;
+                    dest_lng = latLng.longitude;
+
+                    addedLocation = latLng;
+                    setMarker(latLng);
+
+
+                    addToFavPlace(addedLocation);
+                }
+            });
+
+            googleMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
+                @Override
+                public boolean onMarkerClick(Marker marker) {
+
+                    AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+
+                    builder.setMessage("Do you want to add the place in Favourites");
+                    builder.setCancelable(true);
+                    builder.setPositiveButton("YES", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+
+                            onMarkerClick = true;
+
+                           addToFavPlace(addedLocation);
+                        }
+                    });
+                    builder.setNegativeButton("NO", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.cancel();
+                            onMarkerClick = false;
+                        }
+                    });
+
+                    AlertDialog alertDialog = builder.create();
+                    alertDialog.show();
+
+                    Toast.makeText(getActivity(), "marker click", Toast.LENGTH_SHORT).show();
+                    return false;
                 }
             });
         }
     };
+
+    private void addToFavPlace(LatLng latLng){
+
+        Calendar calendar = Calendar.getInstance();
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+        String addDate = simpleDateFormat.format(calendar.getTime());
+
+        Geocoder geocoder = new Geocoder(getActivity(), Locale.getDefault());
+        try{
+            List<Address> addresses = geocoder.getFromLocation(latLng.latitude, latLng.longitude, 1);
+
+            if(!addresses.isEmpty()){
+
+                String address = addresses.get(0).getLocality() + " " + addresses.get(0).getAddressLine(0);
+
+                // insert into room db
+//                Toast.makeText(getActivity(), "lat is : " +addedLocation.latitude +","+addedLocation.longitude, Toast.LENGTH_SHORT).show();
+
+//                Toast.makeText(getActivity(), "lat is : " +address, Toast.LENGTH_SHORT).show();
+
+                if (onMarkerClick){
+
+                    onMarkerClick = false;
+                }else {
+
+                    FavPlace favPlace = new FavPlace(addedLocation.latitude,addedLocation.longitude,addDate,address);
+                    favPlaceRoomDB.favPlaceDao().insertPlace(favPlace);
+
+//                    Toast.makeText(getActivity(), "places NOT FOUND:", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+
+        }catch (IOException e){
+            e.printStackTrace();
+
+        }
+
+    }
 
     private void setMarker(Location destination) {
         LatLng destLatLng = new LatLng(destination.getLatitude(), destination.getLongitude());
