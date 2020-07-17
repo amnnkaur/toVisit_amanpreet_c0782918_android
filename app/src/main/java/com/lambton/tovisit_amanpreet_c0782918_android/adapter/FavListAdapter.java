@@ -55,6 +55,7 @@ public class FavListAdapter extends RecyclerView.Adapter<FavListAdapter.ListView
         holder.address.setText(favPlace.getAddress());
         holder.latitude.setText(favPlace.getLatitude());
         holder.longitude.setText(favPlace.getLongitude());
+        holder.date.setText(favPlace.getDate());
 
     }
 
@@ -74,6 +75,7 @@ public class FavListAdapter extends RecyclerView.Adapter<FavListAdapter.ListView
         TextView address;
         TextView latitude;
         TextView longitude;
+        TextView date;
 
         public ListViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -81,6 +83,7 @@ public class FavListAdapter extends RecyclerView.Adapter<FavListAdapter.ListView
             address = itemView.findViewById(R.id.tv_address);
             latitude = itemView.findViewById(R.id.tv_latitude);
             longitude = itemView.findViewById(R.id.tv_longitude);
+            date = itemView.findViewById(R.id.tv_date);
         }
     }
 }

@@ -20,13 +20,18 @@ public class FavPlace {
     private String longitude;
 
     @NonNull
+    @ColumnInfo(name = "date")
+    private String date;
+
+    @NonNull
     @ColumnInfo(name = "address")
     private String address;
 
-    public FavPlace(int placeID, @NonNull String latitude, @NonNull String longitude, @NonNull String address) {
+    public FavPlace(int placeID, @NonNull String latitude, @NonNull String longitude, @NonNull String date, @NonNull String address) {
         this.placeID = placeID;
         this.latitude = latitude;
         this.longitude = longitude;
+        this.date = date;
         this.address = address;
     }
 
@@ -45,6 +50,15 @@ public class FavPlace {
 
     public void setLatitude(@NonNull String latitude) {
         this.latitude = latitude;
+    }
+
+    @NonNull
+    public String getDate() {
+        return date;
+    }
+
+    public void setDate(@NonNull String date) {
+        this.date = date;
     }
 
     @NonNull
