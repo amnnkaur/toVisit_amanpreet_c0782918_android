@@ -19,8 +19,8 @@ public interface FavPlaceDao {
     int deletePlace(int id);
 
     @Query("UPDATE place SET latitude = :latitude, longitude= :longitude, address = :address WHERE placeID = :id")
-    int updatePlace(int id, String latitude, String longitude, String address);
+    int updatePlace(int id, Double latitude, Double longitude, String address);
 
-    @Query("SELECT * FROM place ORDER BY placeID")
+    @Query("SELECT * FROM place")
     List<FavPlace> getAllPlaces();
 }

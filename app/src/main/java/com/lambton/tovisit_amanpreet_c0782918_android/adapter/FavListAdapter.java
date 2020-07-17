@@ -7,6 +7,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.lambton.tovisit_amanpreet_c0782918_android.R;
@@ -14,6 +15,8 @@ import com.lambton.tovisit_amanpreet_c0782918_android.activity.MainActivity;
 import com.lambton.tovisit_amanpreet_c0782918_android.database.FavPlace;
 import com.lambton.tovisit_amanpreet_c0782918_android.database.FavPlaceRoomDB;
 
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.List;
 
 public class FavListAdapter extends RecyclerView.Adapter<FavListAdapter.ListViewHolder> {
@@ -36,6 +39,9 @@ public class FavListAdapter extends RecyclerView.Adapter<FavListAdapter.ListView
 
     }
 
+
+
+
     @NonNull
     @Override
     public ListViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -53,9 +59,14 @@ public class FavListAdapter extends RecyclerView.Adapter<FavListAdapter.ListView
 
         final FavPlace favPlace = favPlaceList.get(position);
         holder.address.setText(favPlace.getAddress());
-        holder.latitude.setText(favPlace.getLatitude());
-        holder.longitude.setText(favPlace.getLongitude());
-        holder.date.setText(favPlace.getDate());
+        holder.latitude.setText(String.valueOf(favPlace.getLatitude()));
+        holder.longitude.setText(String.valueOf(favPlace.getLongitude()));
+
+        Calendar calendar = Calendar.getInstance();
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+        String addDate = simpleDateFormat.format(calendar.getTime());
+
+        holder.date.setText(addDate);
 
     }
 
@@ -84,6 +95,7 @@ public class FavListAdapter extends RecyclerView.Adapter<FavListAdapter.ListView
             latitude = itemView.findViewById(R.id.tv_latitude);
             longitude = itemView.findViewById(R.id.tv_longitude);
             date = itemView.findViewById(R.id.tv_date);
+
         }
     }
 }

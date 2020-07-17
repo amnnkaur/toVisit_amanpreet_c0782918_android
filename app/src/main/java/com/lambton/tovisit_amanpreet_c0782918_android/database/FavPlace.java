@@ -2,6 +2,7 @@ package com.lambton.tovisit_amanpreet_c0782918_android.database;
 
 import androidx.annotation.NonNull;
 import androidx.room.ColumnInfo;
+import androidx.room.Dao;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 
@@ -13,11 +14,11 @@ public class FavPlace {
 
     @NonNull
     @ColumnInfo(name = "latitude")
-    private String latitude;
+    private double latitude;
 
     @NonNull
     @ColumnInfo(name = "longitude")
-    private String longitude;
+    private double longitude;
 
     @NonNull
     @ColumnInfo(name = "date")
@@ -27,8 +28,7 @@ public class FavPlace {
     @ColumnInfo(name = "address")
     private String address;
 
-    public FavPlace(int placeID, @NonNull String latitude, @NonNull String longitude, @NonNull String date, @NonNull String address) {
-        this.placeID = placeID;
+    public FavPlace(@NonNull double latitude, @NonNull double longitude, @NonNull String date, @NonNull String address) {
         this.latitude = latitude;
         this.longitude = longitude;
         this.date = date;
@@ -44,11 +44,11 @@ public class FavPlace {
     }
 
     @NonNull
-    public String getLatitude() {
+    public double getLatitude() {
         return latitude;
     }
 
-    public void setLatitude(@NonNull String latitude) {
+    public void setLatitude(@NonNull double latitude) {
         this.latitude = latitude;
     }
 
@@ -62,11 +62,11 @@ public class FavPlace {
     }
 
     @NonNull
-    public String getLongitude() {
+    public double getLongitude() {
         return longitude;
     }
 
-    public void setLongitude(@NonNull String longitude) {
+    public void setLongitude(@NonNull double longitude) {
         this.longitude = longitude;
     }
 
