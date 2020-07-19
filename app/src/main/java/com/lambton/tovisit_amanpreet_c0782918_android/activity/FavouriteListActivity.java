@@ -39,6 +39,7 @@ public class FavouriteListActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_fav_list);
 
+        getSupportActionBar().setTitle("Favourite Places");
         rvFavList = findViewById(R.id.rvFavList);
         rvFavList.setLayoutManager(new LinearLayoutManager(this));
         rvFavList.addItemDecoration(new DividerItemDecoration(this,
@@ -50,30 +51,39 @@ public class FavouriteListActivity extends AppCompatActivity {
 
         loadPlaces();
 
-        ItemTouchHelper.SimpleCallback simpleItemTouchCallback = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT) {
+        ItemTouchHelper.SimpleCallback simpleItemTouchCallback = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {
             @Override
             public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
                 return false;
             }
-
             @Override
             public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
                 int position = viewHolder.getAdapterPosition();
-                favPlaceRoomDB.favPlaceDao().deletePlace(favPlace.getPlaceID());
-//                favPlaceList.remove(position);
-                loadPlaces();
-                favListAdapter.notifyDataSetChanged();
 
-//              Toast.makeText(FavouriteListActivity.this, "swipe", Toast.LENGTH_SHORT).show();
+                if (direction == ItemTouchHelper.RIGHT) {
+
+                    Intent intent = new Intent(FavouriteListActivity.this, MainActivity.class);
+                    intent.putExtra("placeID", favPlaceList.get(position).getPlaceID());
+                    startActivity(intent);
+                    finish();
+
+//                    Toast.makeText(FavouriteListActivity.this, favPlaceList.get(position).getAddress(), Toast.LENGTH_SHORT).show();
+
+                } else if (direction == ItemTouchHelper.LEFT) {
+
+                    deletePlace(position);
+                }
             }
         };
-
         ItemTouchHelper itemTouchHelper = new ItemTouchHelper(simpleItemTouchCallback);
         itemTouchHelper.attachToRecyclerView(rvFavList);
 
     }
 
-
+    private void deletePlace(final int position) {
+        favPlaceRoomDB.favPlaceDao().deletePlace(favPlaceList.get(position).getPlaceID());
+        loadPlaces();
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
