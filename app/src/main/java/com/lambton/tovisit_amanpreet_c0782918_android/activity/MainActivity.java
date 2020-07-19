@@ -8,6 +8,7 @@ import androidx.fragment.app.FragmentManager;
 
 import android.Manifest;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Address;
 import android.location.Geocoder;
@@ -41,12 +42,15 @@ import com.google.android.material.chip.ChipGroup;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.lambton.tovisit_amanpreet_c0782918_android.IPassData;
 import com.lambton.tovisit_amanpreet_c0782918_android.R;
+import com.lambton.tovisit_amanpreet_c0782918_android.database.FavPlaceRoomDB;
 import com.lambton.tovisit_amanpreet_c0782918_android.volley.GetByVolley;
 import com.lambton.tovisit_amanpreet_c0782918_android.volley.VolleySingleton;
 
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -64,8 +68,9 @@ public class MainActivity extends AppCompatActivity {
     private FusedLocationProviderClient mClient;
     private LocationCallback mLocationCallback;
     private LocationRequest mLocationRequest;
-
+    private LocationManager mLocationManager;
     private LatLng userLocation;
+    FavPlaceRoomDB favPlaceRoomDB;
 
     FragmentManager fragmentManager;
     MapsFragment fragment;
@@ -83,21 +88,22 @@ public class MainActivity extends AppCompatActivity {
 //        Toolbar toolbar = findViewById(R.id.toolbar);
 //        setSupportActionBar(toolbar);
 
+        getSupportActionBar().hide();
+
         fragmentManager = getSupportFragmentManager();
         fragment = new MapsFragment();
         fragmentManager.beginTransaction()
                 .add(R.id.myContainer, fragment)
                 .commit();
 
-        if (!hasPermission())
+        if (!hasLocationPermission())
             requestLocationPermission();
         else
             startUpdateLocation();
 
-      optionsMapType();
-      typesOfPlaces();
-      goToDirection();
-
+        optionsMapType();
+        typesOfPlaces();
+        goToDirection();
 
     }
 
@@ -108,7 +114,7 @@ public class MainActivity extends AppCompatActivity {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-               fragment.getDestination(new IPassData() {
+                fragment.getDestination(new IPassData() {
                     @Override
                     public void destinationSelected(final Location location, final GoogleMap map) {
 
@@ -154,7 +160,7 @@ public class MainActivity extends AppCompatActivity {
 
                 String restaurantUrl = getPlaceUrl(userLocation.latitude, userLocation.longitude, "restaurant");
                 showNearbyPlaces(restaurantUrl);
-                Toast.makeText(MainActivity.this, "restaurants", Toast.LENGTH_SHORT).show();
+//                Toast.makeText(MainActivity.this, "restaurants", Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -165,7 +171,7 @@ public class MainActivity extends AppCompatActivity {
                 String cafeUrl = getPlaceUrl(userLocation.latitude, userLocation.longitude, "cafe");
                 showNearbyPlaces(cafeUrl);
 
-                Toast.makeText(MainActivity.this, "cafe", Toast.LENGTH_SHORT).show();
+//                Toast.makeText(MainActivity.this, "cafe", Toast.LENGTH_SHORT).show();
 
             }
         });
@@ -177,7 +183,7 @@ public class MainActivity extends AppCompatActivity {
                 String url = getPlaceUrl(userLocation.latitude, userLocation.longitude, "museum");
                 showNearbyPlaces(url);
 
-                Toast.makeText(MainActivity.this, "museums", Toast.LENGTH_SHORT).show();
+//                Toast.makeText(MainActivity.this, "museums", Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -188,7 +194,7 @@ public class MainActivity extends AppCompatActivity {
                 String url = getPlaceUrl(userLocation.latitude, userLocation.longitude, "hospital");
                 showNearbyPlaces(url);
 
-                Toast.makeText(MainActivity.this, "hospital", Toast.LENGTH_SHORT).show();
+//                Toast.makeText(MainActivity.this, "hospital", Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -210,31 +216,31 @@ public class MainActivity extends AppCompatActivity {
 
         mapType.setOnItemSelectedListener((new AdapterView.OnItemSelectedListener(){
 
-                    @Override
-                    public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                        switch (i) {
-                            case 0:
-                                fragment.mMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
-                                break;
-                            case 1:
-                                fragment.mMap.setMapType(GoogleMap.MAP_TYPE_HYBRID);
-                                break;
-                            case 2:
-                                fragment.mMap.setMapType(GoogleMap.MAP_TYPE_TERRAIN);
-                                break;
-                            case 3:
-                                fragment.mMap.setMapType(GoogleMap.MAP_TYPE_SATELLITE);
-                                break;
-                            default:
-                                break;
-                        }
-                    }
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                switch (i) {
+                    case 0:
+                        fragment.mMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
+                        break;
+                    case 1:
+                        fragment.mMap.setMapType(GoogleMap.MAP_TYPE_HYBRID);
+                        break;
+                    case 2:
+                        fragment.mMap.setMapType(GoogleMap.MAP_TYPE_TERRAIN);
+                        break;
+                    case 3:
+                        fragment.mMap.setMapType(GoogleMap.MAP_TYPE_SATELLITE);
+                        break;
+                    default:
+                        break;
+                }
+            }
 
-                    @Override
-                    public void onNothingSelected(AdapterView<?> adapterView) {
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
 
-                    }
-         }));
+            }
+        }));
     }
 
     private void showNearbyPlaces(String url) {
@@ -292,10 +298,11 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onLocationResult(LocationResult locationResult) {
                 Location location = locationResult.getLastLocation();
-                userLocation = new LatLng(location.getLatitude(), location.getLongitude());
+                if (location != null) {
+                    userLocation = new LatLng(location.getLatitude(), location.getLongitude());
 //                Log.d(TAG, "onLocationResult: " + location);
-                fragment.setHomeMarker(location);
-
+                    fragment.setHomeMarker(location);
+                }
             }
         };
         mClient.requestLocationUpdates(mLocationRequest, mLocationCallback, null);
@@ -321,12 +328,31 @@ public class MainActivity extends AppCompatActivity {
 
         if (requestCode == REQUEST_CODE) {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                startUpdateLocation();
+                if (fragment.mMap != null)
+                {
+                    startUpdateLocation();
+                }
             }
         }
     }
 
-
+//    @Override
+//    public void onBackPressed() {
+//
+//
+//        startActivity(new Intent(MainActivity.this, FavouriteListActivity.class));
+//
+//        Calendar cal = Calendar.getInstance();
+//        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("EEE, MMM dd yyyy");
+//        String addedDate = simpleDateFormat.format(cal.getTime());
+//
+//        favPlaceRoomDB.favPlaceDao().updatePlace(fragment.placeID, fragment.destLocation.latitude, fragment.destLocation.longitude, fragment.placeName);
+//        finish();
+////                Toast.makeText(MainActivity.this, "info:" +fragment.placeID +fragment.placeName +fragment.destLocation.latitude, Toast.LENGTH_SHORT).show();
+//
+//
+//
+//    }
 
     public void showLaunchNearbyPlaces(LatLng location) {
         String url = getPlaceUrl(location.latitude, location.longitude, "restaurant");

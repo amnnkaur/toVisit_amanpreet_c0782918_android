@@ -3,6 +3,7 @@ package com.lambton.tovisit_amanpreet_c0782918_android.activity;
 import android.Manifest;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Address;
 import android.location.Geocoder;
@@ -37,6 +38,7 @@ import com.lambton.tovisit_amanpreet_c0782918_android.database.FavPlaceRoomDB;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
@@ -44,7 +46,9 @@ import java.util.Locale;
 
 import javax.xml.transform.sax.TemplatesHandler;
 
-public class MapsFragment extends Fragment implements GoogleMap.OnMarkerDragListener {
+import static android.app.Activity.RESULT_OK;
+
+public class MapsFragment extends Fragment implements GoogleMap.OnMarkerDragListener, GoogleMap.OnMarkerClickListener {
 
     private static final String TAG = "MapsFragment";
 
@@ -54,6 +58,9 @@ public class MapsFragment extends Fragment implements GoogleMap.OnMarkerDragList
     FavPlaceRoomDB favPlaceRoomDB;
 
     LatLng addedLocation;
+    int placeID;
+    String placeName;
+    List<FavPlace> favPlaceList;
 
     public GoogleMap getmMap() {
         return mMap;
@@ -82,87 +89,46 @@ public class MapsFragment extends Fragment implements GoogleMap.OnMarkerDragList
         @Override
         public void onMapReady(final GoogleMap googleMap) {
 
+            // Room database
             favPlaceRoomDB = FavPlaceRoomDB.getINSTANCE(getActivity());
-
             if (ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                 return;
             }
             mMap = googleMap;
             mMap.setOnMarkerDragListener(MapsFragment.this);
+            mMap.setOnMarkerClickListener(MapsFragment.this);
             mMap.setMyLocationEnabled(true);
             mMap.getUiSettings().setZoomControlsEnabled(true);
 
-            mClient.getLastLocation().addOnSuccessListener(getActivity(), new OnSuccessListener<Location>() {
-                @Override
-                public void onSuccess(Location location) {
-                    if (location != null) {
-                        LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
-//                        mMap.addMarker(new MarkerOptions().position(latLng));
-                        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15));
-
-                        ((MainActivity)getActivity()).showLaunchNearbyPlaces(latLng);
-                    }
-                }
-            });
 
             // add long press gesture on map
-            googleMap.setOnMapLongClickListener(new GoogleMap.OnMapLongClickListener() {
+            mMap.setOnMapLongClickListener(new GoogleMap.OnMapLongClickListener() {
                 @Override
                 public void onMapLongClick(LatLng latLng) {
-                    Location location = new Location("Your destination");
-                    location.setLatitude(latLng.latitude);
-                    location.setLongitude(latLng.longitude);
+
+                    destLocation = latLng;
+                    destination = new Location("Your destination");
+                    destination.setLatitude(latLng.latitude);
+                    destination.setLongitude(latLng.longitude);
 
                     dest_lat = latLng.latitude;
                     dest_lng = latLng.longitude;
 
                     addedLocation = latLng;
+
+
                     setMarker(latLng);
-
-
                     addToFavPlace(addedLocation);
                 }
             });
 
-            googleMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
-                @Override
-                public boolean onMarkerClick(Marker marker) {
-
-                    AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-
-                    builder.setMessage("Do you want to add the place in Favourites");
-                    builder.setCancelable(true);
-                    builder.setPositiveButton("YES", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-
-                            onMarkerClick = true;
-
-                           addToFavPlace(addedLocation);
-                        }
-                    });
-                    builder.setNegativeButton("NO", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            dialog.cancel();
-                            onMarkerClick = false;
-                        }
-                    });
-
-                    AlertDialog alertDialog = builder.create();
-                    alertDialog.show();
-
-                    Toast.makeText(getActivity(), "marker click", Toast.LENGTH_SHORT).show();
-                    return false;
-                }
-            });
         }
     };
 
     private void addToFavPlace(LatLng latLng){
 
         Calendar calendar = Calendar.getInstance();
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("EEE, MMM d, yyyy");
         String addDate = simpleDateFormat.format(calendar.getTime());
 
         Geocoder geocoder = new Geocoder(getActivity(), Locale.getDefault());
@@ -171,8 +137,9 @@ public class MapsFragment extends Fragment implements GoogleMap.OnMarkerDragList
 
             if(!addresses.isEmpty()){
 
-                String address = addresses.get(0).getLocality() + " " + addresses.get(0).getAddressLine(0);
+                String address = addresses.get(0).getAddressLine(0);
 
+//                Toast.makeText(getActivity(), "Location: " +addresses.get(0).getAddressLine(0), Toast.LENGTH_SHORT).show();
                 // insert into room db
 //                Toast.makeText(getActivity(), "lat is : " +addedLocation.latitude +","+addedLocation.longitude, Toast.LENGTH_SHORT).show();
 
@@ -216,6 +183,28 @@ public class MapsFragment extends Fragment implements GoogleMap.OnMarkerDragList
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mClient = LocationServices.getFusedLocationProviderClient(getActivity());
+
+        if (ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+            return;
+        }
+        mClient.getLastLocation().addOnSuccessListener(getActivity(), new OnSuccessListener<Location>() {
+            @Override
+            public void onSuccess(Location location) {
+                if (location != null) {
+                    LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
+//                        mMap.addMarker(new MarkerOptions().position(latLng));
+//                    mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15));
+//                    ((MainActivity) getActivity()).showLaunchNearbyPlaces(latLng);
+                }
+            }
+        });
     }
 
     @Nullable
@@ -237,9 +226,18 @@ public class MapsFragment extends Fragment implements GoogleMap.OnMarkerDragList
     }
 
     public void setHomeMarker(Location location) {
-        LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15));
+
+        SupportMapFragment mapFragment =
+                (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map);
+        if (mapFragment != null) {
+            mapFragment.getMapAsync(callback);
+        }
+        if(mMap!=null){
+            LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
+            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15));
+        }
     }
+
 
     public void getDestination(IPassData callback) {
         callback.destinationSelected(destination, mMap);
@@ -282,6 +280,54 @@ public class MapsFragment extends Fragment implements GoogleMap.OnMarkerDragList
         }
     }
 
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+//        super.onActivityResult(requestCode, resultCode, data);
+        if (resultCode == RESULT_OK) {
+            if (requestCode == 1) {
+                favPlaceList = favPlaceRoomDB.favPlaceDao().getAllPlaces();
+            }
+        }
+    }
+
+    @Override
+    public boolean onMarkerClick(Marker marker) {
+
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+
+        builder.setMessage("Do you want to add the place in Favourites");
+        builder.setCancelable(true);
+        builder.setPositiveButton("YES", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+
+                onMarkerClick = true;
+
+                addToFavPlace(addedLocation);
+
+//                            Intent intent =  new Intent(getActivity(),FavouriteListActivity.class);
+//                            startActivity(intent);
+//                            getActivity().finish();
+
+                startActivityForResult(new Intent(getActivity(),FavouriteListActivity.class),1);
+
+            }
+        });
+        builder.setNegativeButton("NO", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.cancel();
+                onMarkerClick = false;
+            }
+        });
+
+        AlertDialog alertDialog = builder.create();
+        alertDialog.show();
+
+//                    Toast.makeText(getActivity(), "marker click", Toast.LENGTH_SHORT).show();
+        return false;
+    }
 }
 
 
