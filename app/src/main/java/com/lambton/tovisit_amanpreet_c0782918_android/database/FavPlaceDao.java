@@ -23,4 +23,7 @@ public interface FavPlaceDao {
 
     @Query("SELECT * FROM place")
     List<FavPlace> getAllPlaces();
+
+    @Query("SELECT * FROM place WHERE placeID = :id")
+    List<FavPlace> getSelectedPlaces(int id);
 }

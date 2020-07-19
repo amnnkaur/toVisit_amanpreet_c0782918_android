@@ -19,6 +19,8 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.Spinner;
 import android.widget.Toast;
 
@@ -42,6 +44,7 @@ import com.google.android.material.chip.ChipGroup;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.lambton.tovisit_amanpreet_c0782918_android.IPassData;
 import com.lambton.tovisit_amanpreet_c0782918_android.R;
+import com.lambton.tovisit_amanpreet_c0782918_android.database.FavPlace;
 import com.lambton.tovisit_amanpreet_c0782918_android.database.FavPlaceRoomDB;
 import com.lambton.tovisit_amanpreet_c0782918_android.volley.GetByVolley;
 import com.lambton.tovisit_amanpreet_c0782918_android.volley.VolleySingleton;
@@ -71,6 +74,7 @@ public class MainActivity extends AppCompatActivity {
     private LocationManager mLocationManager;
     private LatLng userLocation;
     FavPlaceRoomDB favPlaceRoomDB;
+    FavPlace favPlace;
 
     FragmentManager fragmentManager;
     MapsFragment fragment;
@@ -79,6 +83,8 @@ public class MainActivity extends AppCompatActivity {
     ChipGroup chipGroupType;
     Chip chipCafe, chipMuseums, chipRestaurants, chipHospital, chipSchool;
     Spinner mapType;
+    ImageButton btnSearch;
+    EditText et_search;
 
 
     @Override
@@ -104,6 +110,51 @@ public class MainActivity extends AppCompatActivity {
         optionsMapType();
         typesOfPlaces();
         goToDirection();
+
+        searchClicked();
+    }
+
+    private void searchClicked() {
+
+        et_search = findViewById(R.id.et_search);
+        btnSearch = findViewById(R.id.btnSearch);
+
+        btnSearch.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+        String text = et_search.getText().toString().trim();
+        if (!text.isEmpty()) {
+            try {
+                Geocoder geocoder = new Geocoder(MainActivity.this);
+
+                List<Address> address;
+
+                address =  geocoder.getFromLocationName(text,1);
+                MarkerOptions markerOptions = new MarkerOptions().position(new LatLng(address.get(0).getLatitude(),address.get(0).getLongitude())).draggable(true);
+                String strings = address.get(0).getAddressLine(0);
+                LatLng latLng = new LatLng(address.get(0).getLatitude(),address.get(0).getLongitude());
+                if(strings.isEmpty())
+                {
+                    markerOptions.title(favPlace.getDate());
+                }
+                else
+                {
+                    markerOptions.title(text);
+                }
+
+                fragment.mMap.addMarker(markerOptions);
+                fragment.mMap.animateCamera(CameraUpdateFactory.newLatLng(latLng));
+
+            } catch (IOException e)
+            {
+                e.printStackTrace();
+            }
+
+        }
+            }
+        });
+
 
     }
 
@@ -336,23 +387,20 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-//    @Override
-//    public void onBackPressed() {
-//
-//
-//        startActivity(new Intent(MainActivity.this, FavouriteListActivity.class));
-//
-//        Calendar cal = Calendar.getInstance();
-//        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("EEE, MMM dd yyyy");
-//        String addedDate = simpleDateFormat.format(cal.getTime());
-//
-//        favPlaceRoomDB.favPlaceDao().updatePlace(fragment.placeID, fragment.destLocation.latitude, fragment.destLocation.longitude, fragment.placeName);
-//        finish();
-////                Toast.makeText(MainActivity.this, "info:" +fragment.placeID +fragment.placeName +fragment.destLocation.latitude, Toast.LENGTH_SHORT).show();
-//
-//
-//
-//    }
+    @Override
+    public void onBackPressed() {
+
+        startActivity(new Intent(MainActivity.this, FavouriteListActivity.class));
+
+        Calendar cal = Calendar.getInstance();
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("EEE, MMM dd yyyy");
+        String addedDate = simpleDateFormat.format(cal.getTime());
+
+        favPlaceRoomDB.favPlaceDao().updatePlace(fragment.placeID, fragment.destLocation.latitude, fragment.destLocation.longitude, fragment.placeName);
+        finish();
+//                Toast.makeText(MainActivity.this, "info:" +fragment.placeID +fragment.placeName +fragment.destLocation.latitude, Toast.LENGTH_SHORT).show();
+
+    }
 
     public void showLaunchNearbyPlaces(LatLng location) {
         String url = getPlaceUrl(location.latitude, location.longitude, "restaurant");

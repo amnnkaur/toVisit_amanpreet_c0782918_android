@@ -10,7 +10,9 @@ import android.location.Geocoder;
 import android.location.Location;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.GestureDetector;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
@@ -61,6 +63,7 @@ public class MapsFragment extends Fragment implements GoogleMap.OnMarkerDragList
     int placeID;
     String placeName;
     List<FavPlace> favPlaceList;
+    GestureDetector gestureDetector;
 
     public GoogleMap getmMap() {
         return mMap;
@@ -89,8 +92,15 @@ public class MapsFragment extends Fragment implements GoogleMap.OnMarkerDragList
         @Override
         public void onMapReady(final GoogleMap googleMap) {
 
+            placeID = getActivity().getIntent().getIntExtra("placeID", 0);
+            favPlaceList = new ArrayList<>();
+
+
+
             // Room database
             favPlaceRoomDB = FavPlaceRoomDB.getINSTANCE(getActivity());
+            favPlaceList = favPlaceRoomDB.favPlaceDao().getAllPlaces();
+
             if (ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                 return;
             }
@@ -99,6 +109,20 @@ public class MapsFragment extends Fragment implements GoogleMap.OnMarkerDragList
             mMap.setOnMarkerClickListener(MapsFragment.this);
             mMap.setMyLocationEnabled(true);
             mMap.getUiSettings().setZoomControlsEnabled(true);
+
+            for (FavPlace places : favPlaceList) {
+                if (places.getPlaceID() == placeID) {
+
+                    LatLng latLng = new LatLng(places.getLatitude(), places.getLongitude());
+                    addedLocation = latLng;
+                    placeName = places.getAddress();
+                    mMap.addMarker(new MarkerOptions()
+                            .position(addedLocation)
+                            .title(placeName)
+                            .draggable(true));
+                    mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15));
+                }
+            }
 
 
             // add long press gesture on map
@@ -110,32 +134,24 @@ public class MapsFragment extends Fragment implements GoogleMap.OnMarkerDragList
                     destination = new Location("Your destination");
                     destination.setLatitude(latLng.latitude);
                     destination.setLongitude(latLng.longitude);
-
-                    dest_lat = latLng.latitude;
-                    dest_lng = latLng.longitude;
-
-                    addedLocation = latLng;
-
-
-                    setMarker(latLng);
-                    addToFavPlace(addedLocation);
+                    setMarker(destLocation);
                 }
             });
 
         }
     };
 
-    private void addToFavPlace(LatLng latLng){
+    private void addToFavPlace(Marker marker){
 
         Calendar calendar = Calendar.getInstance();
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("EEE, MMM d, yyyy");
         String addDate = simpleDateFormat.format(calendar.getTime());
 
         Geocoder geocoder = new Geocoder(getActivity(), Locale.getDefault());
-        try{
-            List<Address> addresses = geocoder.getFromLocation(latLng.latitude, latLng.longitude, 1);
+        try {
+            List<Address> addresses = geocoder.getFromLocation(marker.getPosition().latitude, marker.getPosition().longitude, 1);
 
-            if(!addresses.isEmpty()){
+            if (!addresses.isEmpty()) {
 
                 String address = addresses.get(0).getAddressLine(0);
 
@@ -145,17 +161,17 @@ public class MapsFragment extends Fragment implements GoogleMap.OnMarkerDragList
 
 //                Toast.makeText(getActivity(), "lat is : " +address, Toast.LENGTH_SHORT).show();
 
-                if (onMarkerClick){
+//                if (onMarkerClick){
+//
+//                    onMarkerClick = false;
+//                }else {
 
-                    onMarkerClick = false;
-                }else {
-
-                    FavPlace favPlace = new FavPlace(addedLocation.latitude,addedLocation.longitude,addDate,address);
-                    favPlaceRoomDB.favPlaceDao().insertPlace(favPlace);
+                FavPlace favPlace = new FavPlace(marker.getPosition().latitude, marker.getPosition().longitude, addDate, address,false);
+                favPlaceRoomDB.favPlaceDao().insertPlace(favPlace);
 
 //                    Toast.makeText(getActivity(), "places NOT FOUND:", Toast.LENGTH_SHORT).show();
-                }
             }
+//        }
 
 
         }catch (IOException e){
@@ -205,6 +221,8 @@ public class MapsFragment extends Fragment implements GoogleMap.OnMarkerDragList
                 }
             }
         });
+
+
     }
 
     @Nullable
@@ -253,31 +271,38 @@ public class MapsFragment extends Fragment implements GoogleMap.OnMarkerDragList
 
     }
 
-    @Override
-    public void onMarkerDragEnd(Marker marker) {
-        destination.setLatitude(marker.getPosition().latitude);
-        destination.setLongitude(marker.getPosition().longitude);
+    private String locationName(Marker marker) {
 
-        Log.d(TAG, "onMarkerDragEnd: " + destination.getLatitude());
-
+        LatLng latLng = new LatLng(marker.getPosition().latitude, marker.getPosition().longitude);
+        String address = "";
         Geocoder geocoder = new Geocoder(getActivity(), Locale.getDefault());
         try {
-            List<Address> addresses = geocoder.getFromLocation(destination.getLatitude(), destination.getLongitude(), 1);
+            List<Address> addresses = geocoder.getFromLocation(latLng.latitude, latLng.longitude, 1);
             if (addresses != null && addresses.size() > 0) {
-                String address = "";
-                if (addresses.get(0).getAdminArea() != null)
-                    address += addresses.get(0).getAdminArea() + " ";
-                if (addresses.get(0).getLocality() != null)
-                    address += addresses.get(0).getLocality() + " ";
-                if (addresses.get(0).getPostalCode() != null)
-                    address += addresses.get(0).getPostalCode() + " ";
+
+                if (addresses.get(0).getSubThoroughfare() != null)
+                    address += addresses.get(0).getSubThoroughfare() + ", ";
                 if (addresses.get(0).getThoroughfare() != null)
-                    address += addresses.get(0).getThoroughfare();
-                Toast.makeText(getActivity(), address, Toast.LENGTH_SHORT).show();
+                    address += addresses.get(0).getThoroughfare() + ", ";
+                if (addresses.get(0).getLocality() != null)
+                    address += addresses.get(0).getLocality() + ", ";
+                if (addresses.get(0).getAdminArea() != null)
+                    address += addresses.get(0).getAdminArea();
+                if (addresses.get(0).getPostalCode() != null)
+                    address += "\n" + addresses.get(0).getPostalCode();
+
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
+        return address;
+    }
+
+    @Override
+    public void onMarkerDragEnd(Marker marker) {
+        addedLocation = new LatLng(marker.getPosition().latitude, marker.getPosition().longitude);
+        placeName = locationName(marker);
+
     }
 
     @Override
@@ -291,8 +316,7 @@ public class MapsFragment extends Fragment implements GoogleMap.OnMarkerDragList
     }
 
     @Override
-    public boolean onMarkerClick(Marker marker) {
-
+    public boolean onMarkerClick(final Marker marker) {
 
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
 
@@ -304,12 +328,11 @@ public class MapsFragment extends Fragment implements GoogleMap.OnMarkerDragList
 
                 onMarkerClick = true;
 
-                addToFavPlace(addedLocation);
+                addToFavPlace(marker);
 
 //                            Intent intent =  new Intent(getActivity(),FavouriteListActivity.class);
 //                            startActivity(intent);
 //                            getActivity().finish();
-
                 startActivityForResult(new Intent(getActivity(),FavouriteListActivity.class),1);
 
             }
@@ -328,6 +351,7 @@ public class MapsFragment extends Fragment implements GoogleMap.OnMarkerDragList
 //                    Toast.makeText(getActivity(), "marker click", Toast.LENGTH_SHORT).show();
         return false;
     }
+
 }
 
 

@@ -1,16 +1,21 @@
 package com.lambton.tovisit_amanpreet_c0782918_android.adapter;
 
 import android.content.Context;
+import android.content.Intent;
+import android.view.ContextMenu;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.lambton.tovisit_amanpreet_c0782918_android.R;
+import com.lambton.tovisit_amanpreet_c0782918_android.activity.FavouriteListActivity;
 import com.lambton.tovisit_amanpreet_c0782918_android.activity.MainActivity;
 import com.lambton.tovisit_amanpreet_c0782918_android.database.FavPlace;
 import com.lambton.tovisit_amanpreet_c0782918_android.database.FavPlaceRoomDB;
@@ -28,6 +33,8 @@ public class FavListAdapter extends RecyclerView.Adapter<FavListAdapter.ListView
 
     FavPlaceRoomDB favPlaceRoomDB;
     MainActivity mainActivity;
+
+    ListViewHolder listViewHolder;
 
     public FavListAdapter(Context context, int resource, List<FavPlace> favPlaces) {
 
@@ -49,13 +56,13 @@ public class FavListAdapter extends RecyclerView.Adapter<FavListAdapter.ListView
         final LayoutInflater inflater = LayoutInflater.from(context);
         View view = inflater.inflate(layoutRes, null);
 
-        ListViewHolder listViewHolder = new FavListAdapter.ListViewHolder(view);
+        listViewHolder = new FavListAdapter.ListViewHolder(view);
 
         return listViewHolder;
     }
 
     @Override
-    public void onBindViewHolder(@NonNull ListViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull final ListViewHolder holder, int position) {
 
         final FavPlace favPlace = favPlaceList.get(position);
         holder.address.setText(favPlace.getAddress());
@@ -63,10 +70,11 @@ public class FavListAdapter extends RecyclerView.Adapter<FavListAdapter.ListView
         holder.longitude.setText(String.valueOf(favPlace.getLongitude()));
 
         Calendar calendar = Calendar.getInstance();
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("EEE, MMM d, yyyy");
         String addDate = simpleDateFormat.format(calendar.getTime());
 
         holder.date.setText(addDate);
+
 
     }
 
@@ -75,13 +83,14 @@ public class FavListAdapter extends RecyclerView.Adapter<FavListAdapter.ListView
         return favPlaceList.size();
     }
 
-    private void loadPlaces() {
+    public void loadPlaces() {
+
         favPlaceList= favPlaceRoomDB.favPlaceDao().getAllPlaces();
         notifyDataSetChanged();
 
     }
 
-    public class ListViewHolder extends RecyclerView.ViewHolder {
+    public class ListViewHolder extends RecyclerView.ViewHolder implements View.OnCreateContextMenuListener {
 
         TextView address;
         TextView latitude;
@@ -96,6 +105,39 @@ public class FavListAdapter extends RecyclerView.Adapter<FavListAdapter.ListView
             longitude = itemView.findViewById(R.id.tv_longitude);
             date = itemView.findViewById(R.id.tv_date);
 
+            itemView.setOnCreateContextMenuListener(this);
+        }
+
+        @Override
+        public void onCreateContextMenu(final ContextMenu contextMenu, View view, ContextMenu.ContextMenuInfo contextMenuInfo) {
+
+            final int position = listViewHolder.getAdapterPosition();
+
+            contextMenu.add("Edit Location").setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+                @Override
+                public boolean onMenuItemClick(MenuItem menuItem) {
+
+
+                    Intent intent = new Intent(context, MainActivity.class);
+                    intent.putExtra("placeID", favPlaceList.get(position).getPlaceID());
+                    context.startActivity(intent);
+
+//                    Toast.makeText(context, "On click", Toast.LENGTH_SHORT).show();
+
+                    return true;
+                }
+            });
+
+            contextMenu.add("Mark as Visited").setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+                @Override
+                public boolean onMenuItemClick(MenuItem menuItem) {
+
+
+                    return true;
+                }
+            });
+
         }
     }
+
 }

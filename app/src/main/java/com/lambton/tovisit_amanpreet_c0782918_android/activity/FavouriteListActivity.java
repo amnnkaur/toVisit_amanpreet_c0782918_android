@@ -1,12 +1,14 @@
 package com.lambton.tovisit_amanpreet_c0782918_android.activity;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
@@ -18,6 +20,7 @@ import android.widget.Toast;
 
 import com.lambton.tovisit_amanpreet_c0782918_android.R;
 import com.lambton.tovisit_amanpreet_c0782918_android.adapter.FavListAdapter;
+import com.lambton.tovisit_amanpreet_c0782918_android.adapter.MovedPlaceAdapter;
 import com.lambton.tovisit_amanpreet_c0782918_android.database.FavPlace;
 import com.lambton.tovisit_amanpreet_c0782918_android.database.FavPlaceRoomDB;
 
@@ -40,6 +43,7 @@ public class FavouriteListActivity extends AppCompatActivity {
         setContentView(R.layout.activity_fav_list);
 
         getSupportActionBar().setTitle("Favourite Places");
+
         rvFavList = findViewById(R.id.rvFavList);
         rvFavList.setLayoutManager(new LinearLayoutManager(this));
         rvFavList.addItemDecoration(new DividerItemDecoration(this,
@@ -62,11 +66,14 @@ public class FavouriteListActivity extends AppCompatActivity {
 
                 if (direction == ItemTouchHelper.RIGHT) {
 
-                    Intent intent = new Intent(FavouriteListActivity.this, MainActivity.class);
+                    Intent intent = new Intent(FavouriteListActivity.this, MoveToActivity.class);
                     intent.putExtra("placeID", favPlaceList.get(position).getPlaceID());
+
                     startActivity(intent);
                     finish();
 
+                    favPlaceList.remove(position);
+                    loadPlaces();
 //                    Toast.makeText(FavouriteListActivity.this, favPlaceList.get(position).getAddress(), Toast.LENGTH_SHORT).show();
 
                 } else if (direction == ItemTouchHelper.LEFT) {
@@ -75,14 +82,38 @@ public class FavouriteListActivity extends AppCompatActivity {
                 }
             }
         };
+
         ItemTouchHelper itemTouchHelper = new ItemTouchHelper(simpleItemTouchCallback);
         itemTouchHelper.attachToRecyclerView(rvFavList);
 
     }
 
     private void deletePlace(final int position) {
-        favPlaceRoomDB.favPlaceDao().deletePlace(favPlaceList.get(position).getPlaceID());
-        loadPlaces();
+
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+
+        builder.setMessage("Are you sure you want to delete this?");
+        builder.setCancelable(true);
+        builder.setPositiveButton("YES", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+
+                favPlaceRoomDB.favPlaceDao().deletePlace(favPlaceList.get(position).getPlaceID());
+                favListAdapter.loadPlaces();
+
+            }
+        });
+        builder.setNegativeButton("NO", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.cancel();
+            }
+        });
+
+        AlertDialog alertDialog = builder.create();
+        alertDialog.show();
+
     }
 
     @Override
@@ -90,22 +121,22 @@ public class FavouriteListActivity extends AppCompatActivity {
 
         getMenuInflater().inflate(R.menu.mymenu, menu);
 
-        MenuItem searchItem = menu.findItem(R.id.btnSearch);
-
-        SearchView searchView = (SearchView) searchItem.getActionView();
-        searchView.setImeOptions(EditorInfo.IME_ACTION_DONE);
-        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-            @Override
-            public boolean onQueryTextSubmit(String query) {
-                return false;
-            }
-
-            @Override
-            public boolean onQueryTextChange(String newText) {
-//                favListAdapter.getFilter().filter(newText);
-                return false;
-            }
-        });
+        MenuItem visitedItem = menu.findItem(R.id.btnVisited);
+//
+//        SearchView searchView = (SearchView) searchItem.getActionView();
+//        searchView.setImeOptions(EditorInfo.IME_ACTION_DONE);
+//        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+//            @Override
+//            public boolean onQueryTextSubmit(String query) {
+//                return false;
+//            }
+//
+//            @Override
+//            public boolean onQueryTextChange(String newText) {
+////                favListAdapter.getFilter().filter(newText);
+//                return false;
+//            }
+//        });
         return true;
 
     }
@@ -118,14 +149,24 @@ public class FavouriteListActivity extends AppCompatActivity {
             Intent intent = new Intent(FavouriteListActivity.this, MainActivity.class);
             startActivity(intent);
         }
+
+
+        if (item.getItemId() == R.id.btnVisited){
+
+            Intent intent = new Intent(FavouriteListActivity.this, MoveToActivity.class);
+            startActivity(intent);
+        }
+
         return super.onOptionsItemSelected(item);
     }
 
     private void loadPlaces() {
+
         favPlaceList = favPlaceRoomDB.favPlaceDao().getAllPlaces();
 
         favListAdapter = new FavListAdapter(this,R.layout.item_place, favPlaceList);
         rvFavList.setAdapter(favListAdapter);
 
     }
+
 }

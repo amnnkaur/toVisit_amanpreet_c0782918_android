@@ -28,11 +28,16 @@ public class FavPlace {
     @ColumnInfo(name = "address")
     private String address;
 
-    public FavPlace(@NonNull double latitude, @NonNull double longitude, @NonNull String date, @NonNull String address) {
+    @NonNull
+    @ColumnInfo(name = "status")
+    private boolean status;
+
+    public FavPlace(@NonNull double latitude, @NonNull double longitude, @NonNull String date, @NonNull String address, @NonNull boolean status) {
         this.latitude = latitude;
         this.longitude = longitude;
         this.date = date;
         this.address = address;
+        this.status = status;
     }
 
     public int getPlaceID() {
@@ -77,5 +82,13 @@ public class FavPlace {
 
     public void setAddress(@NonNull String address) {
         this.address = address;
+    }
+
+    public boolean isStatus() {
+        return status;
+    }
+
+    public void setStatus(boolean status) {
+        this.status = status;
     }
 }
