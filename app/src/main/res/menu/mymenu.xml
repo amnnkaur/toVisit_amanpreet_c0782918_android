@@ -3,11 +3,10 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
-        android:id="@+id/btnSearch"
-        android:icon="@android:drawable/ic_menu_search"
-        android:title="Search"
-        app:showAsAction="always"
-        app:actionViewClass="android.widget.SearchView"/>
+        android:id="@+id/btnVisited"
+        android:icon="@android:drawable/ic_dialog_map"
+        android:title="Visited Places"
+        app:showAsAction="always" />
     <item
         android:id="@+id/btnAdd"
         android:icon="@drawable/ic_add_white_24dp"
