@@ -37,9 +37,10 @@ public class GetByVolley {
                 .snippet("Distance : " + distance)
                 .draggable(true);
         googleMap.addMarker(options);
+
         for (int i=0; i<directionsList.length; i++) {
             PolylineOptions polylineOptions = new PolylineOptions()
-                    .color(Color.RED)
+                    .color(Color.BLUE)
                     .width(10)
                     .addAll(PolyUtil.decode(directionsList[i]));
             googleMap.addPolyline(polylineOptions);

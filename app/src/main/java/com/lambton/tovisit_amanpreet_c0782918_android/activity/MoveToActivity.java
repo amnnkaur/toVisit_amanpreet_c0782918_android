@@ -1,7 +1,9 @@
 package com.lambton.tovisit_amanpreet_c0782918_android.activity;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.DividerItemDecoration;
+import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -52,11 +54,34 @@ public class MoveToActivity extends AppCompatActivity {
         placeID = getIntent().getIntExtra("placeID", 0);
 
         loadPlaces();
+
+        ItemTouchHelper.SimpleCallback simpleItemTouchCallback = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT) {
+            @Override
+            public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
+                return false;
+            }
+            @Override
+            public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
+                int position = viewHolder.getAdapterPosition();
+
+            if (direction == ItemTouchHelper.LEFT) {
+
+                favPlaceRoomDB.favPlaceDao().deletePlace(favPlaceList.get(position).getPlaceID());
+                movedPlaceAdapter.loadPlaces();
+
+                }
+            }
+        };
+
+        ItemTouchHelper itemTouchHelper = new ItemTouchHelper(simpleItemTouchCallback);
+        itemTouchHelper.attachToRecyclerView(rvMovedList);
+
+        loadPlaces();
     }
 
     private void loadPlaces() {
 
-        favPlaceList = favPlaceRoomDB.favPlaceDao().getAllPlaces();
+        favPlaceList = favPlaceRoomDB.favPlaceDao().getSelectedStatusPlaces(true);
 
         movedPlaceAdapter = new MovedPlaceAdapter(this,R.layout.item_place, favPlaceList);
 
@@ -66,6 +91,7 @@ public class MoveToActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
+
         Intent intent = new Intent(MoveToActivity.this,FavouriteListActivity.class);
         startActivity(intent);
         finish();

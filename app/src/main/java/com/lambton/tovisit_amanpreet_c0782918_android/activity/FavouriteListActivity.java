@@ -166,8 +166,12 @@ public class FavouriteListActivity extends AppCompatActivity {
 
         if (item.getItemId() == R.id.btnAdd){
 
+            MapsFragment.flagEdit = false;
+            MainActivity.EDIT_CALL = false;
+
             Intent intent = new Intent(FavouriteListActivity.this, MainActivity.class);
             startActivity(intent);
+            finish();
         }
 
 

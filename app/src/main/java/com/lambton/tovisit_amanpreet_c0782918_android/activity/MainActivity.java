@@ -398,7 +398,9 @@ public class MainActivity extends AppCompatActivity {
                 if (location != null) {
                     userLocation = new LatLng(location.getLatitude(), location.getLongitude());
 //                Log.d(TAG, "onLocationResult: " + location);
+
                     if (!EDIT_CALL) {
+
                         fragment.setHomeMarker(location);
                     }
                 }
@@ -467,10 +469,11 @@ public class MainActivity extends AppCompatActivity {
     public void onBackPressed() {
 
 
+        if (EDIT_CALL) {
 //
-        Calendar cal = Calendar.getInstance();
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("EEE, MMM dd yyyy");
-        String addedDate = simpleDateFormat.format(cal.getTime());
+            Calendar cal = Calendar.getInstance();
+            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("EEE, MMM dd yyyy");
+            String addedDate = simpleDateFormat.format(cal.getTime());
 //
 //        favPlaceRoomDB.favPlaceDao().updatePlace(fragment.placeID, fragment.addedLocation.latitude, fragment.addedLocation.longitude,addedDate, fragment.placeName,false);
 //        finish();
@@ -480,14 +483,19 @@ public class MainActivity extends AppCompatActivity {
 //        super.onBackPressed();
 
 
-        favPlaceRoomDB.favPlaceDao().updatePlace(callID, fragment.getDest_lat(), fragment.getDest_lng(),addedDate,geoPlaceName(new LatLng(fragment.getDest_lat(),fragment.getDest_lng())) ,false);
+            favPlaceRoomDB.favPlaceDao().updatePlace(callID, fragment.getDest_lat(), fragment.getDest_lng(), addedDate, geoPlaceName(new LatLng(fragment.getDest_lat(), fragment.getDest_lng())), false);
+
+        }
+
+        EDIT_CALL = true;
 
         startActivity(new Intent(MainActivity.this, FavouriteListActivity.class));
         finish();
     }
 
-    public void showLaunchNearbyPlaces(LatLng location) {
-        String url = getPlaceUrl(location.latitude, location.longitude, "restaurant");
-        showNearbyPlaces(url);
-    }
+        public void showLaunchNearbyPlaces (LatLng location){
+            String url = getPlaceUrl(location.latitude, location.longitude, "restaurant");
+            showNearbyPlaces(url);
+        }
+
 }

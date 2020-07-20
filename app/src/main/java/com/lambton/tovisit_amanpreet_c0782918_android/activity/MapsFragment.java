@@ -33,6 +33,7 @@ import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.lambton.tovisit_amanpreet_c0782918_android.IPassData;
 import com.lambton.tovisit_amanpreet_c0782918_android.R;
@@ -126,8 +127,7 @@ public class MapsFragment extends Fragment implements GoogleMap.OnMarkerDragList
             if (flagEdit){
                 MarkerOptions markerOptions = new MarkerOptions()
                         .position(new LatLng(dest_lat,dest_lng))
-                        .title("favPlaceCall.get(0).getAddress()")
-                        .snippet("favPlaceCall.get(0).getDate()")
+                        .title("Your new destination")
                         .draggable(true);
                 mMap.addMarker(markerOptions);
                 mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(dest_lat,dest_lng),15));
@@ -280,8 +280,7 @@ public class MapsFragment extends Fragment implements GoogleMap.OnMarkerDragList
 //                        .bearing(0).build();
                 MarkerOptions markerOptions = new MarkerOptions()
                         .position(latLng)
-                        .title("favPlaceCall.get(0).getAddress()")
-                        .snippet("favPlaceCall.get(0).getDate()")
+                        .title("Your destination")
                         .draggable(true);
                 mMap.addMarker(markerOptions);
                 mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng,15));
