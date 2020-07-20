@@ -142,7 +142,7 @@ public class MainActivity extends AppCompatActivity {
                 latCall = favPlaceCall.get(0).getLatitude();
                 lngCall = favPlaceCall.get(0).getLongitude();
 
-                Toast.makeText(this, "lat" +latCall + ","+ lngCall, Toast.LENGTH_SHORT).show();
+//                Toast.makeText(this, "lat" +latCall + ","+ lngCall, Toast.LENGTH_SHORT).show();
 
                 MarkerOptions markerOptions = new MarkerOptions()
                         .position(new LatLng(latCall,lngCall))
@@ -435,22 +435,55 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    public String geoPlaceName(LatLng geoLatLng){
+
+        LatLng latLng = new LatLng(geoLatLng.latitude, geoLatLng.longitude);
+        String address = "";
+        Geocoder geocoder = new Geocoder(MainActivity.this, Locale.getDefault());
+        try {
+            List<Address> addresses = geocoder.getFromLocation(latLng.latitude, latLng.longitude, 1);
+            if (addresses != null && addresses.size() > 0) {
+
+                if (addresses.get(0).getSubThoroughfare() != null)
+                    address += addresses.get(0).getSubThoroughfare() + ", ";
+                if (addresses.get(0).getThoroughfare() != null)
+                    address += addresses.get(0).getThoroughfare() + ", ";
+                if (addresses.get(0).getLocality() != null)
+                    address += addresses.get(0).getLocality() + ", ";
+                if (addresses.get(0).getAdminArea() != null)
+                    address += addresses.get(0).getAdminArea();
+                if (addresses.get(0).getPostalCode() != null)
+                    address += "\n" + addresses.get(0).getPostalCode();
+
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return address;
+
+    }
+
     @Override
     public void onBackPressed() {
 
-//        startActivity(new Intent(MainActivity.this, FavouriteListActivity.class));
+
 //
-//        Calendar cal = Calendar.getInstance();
-//        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("EEE, MMM dd yyyy");
-//        String addedDate = simpleDateFormat.format(cal.getTime());
+        Calendar cal = Calendar.getInstance();
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("EEE, MMM dd yyyy");
+        String addedDate = simpleDateFormat.format(cal.getTime());
 //
 //        favPlaceRoomDB.favPlaceDao().updatePlace(fragment.placeID, fragment.addedLocation.latitude, fragment.addedLocation.longitude,addedDate, fragment.placeName,false);
 //        finish();
 //      Toast.makeText(MainActivity.this, "info:" +fragment.placeID +fragment.placeName +fragment.destLocation.latitude, Toast.LENGTH_SHORT).show();
 
 
-        super.onBackPressed();
+//        super.onBackPressed();
 
+
+        favPlaceRoomDB.favPlaceDao().updatePlace(callID, fragment.getDest_lat(), fragment.getDest_lng(),addedDate,geoPlaceName(new LatLng(fragment.getDest_lat(),fragment.getDest_lng())) ,false);
+
+        startActivity(new Intent(MainActivity.this, FavouriteListActivity.class));
+        finish();
     }
 
     public void showLaunchNearbyPlaces(LatLng location) {

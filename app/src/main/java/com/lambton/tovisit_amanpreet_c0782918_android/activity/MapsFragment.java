@@ -82,6 +82,14 @@ public class MapsFragment extends Fragment implements GoogleMap.OnMarkerDragList
     static double dest_lat, dest_lng;
     boolean onMarkerClick = false;
 
+    public static double getDest_lat() {
+        return dest_lat;
+    }
+
+    public static double getDest_lng() {
+        return dest_lng;
+    }
+
     private OnMapReadyCallback callback = new OnMapReadyCallback() {
 
         /**
@@ -325,14 +333,20 @@ public class MapsFragment extends Fragment implements GoogleMap.OnMarkerDragList
     @Override
     public void onMarkerDragEnd(Marker marker) {
 
-        mMap.clear();
+//        mMap.clear();
+//
+//        MarkerOptions markerOptions = new MarkerOptions().position(marker.getPosition())
+//                .title("Your dragged location").draggable(true);
+//        mMap.addMarker(markerOptions);
+//
+//        addedLocation = new LatLng(marker.getPosition().latitude, marker.getPosition().longitude);
+//        placeName = locationName(marker);
 
-        MarkerOptions markerOptions = new MarkerOptions().position(marker.getPosition())
-                .title("Your dragged location").draggable(true);
-        mMap.addMarker(markerOptions);
+        dest_lat = marker.getPosition().latitude;
+        dest_lng = marker.getPosition().longitude;
 
-        addedLocation = new LatLng(marker.getPosition().latitude, marker.getPosition().longitude);
-        placeName = locationName(marker);
+//        Toast.makeText(getActivity(), "dest lat" +dest_lat + "," +dest_lng, Toast.LENGTH_SHORT).show();
+
 
     }
 

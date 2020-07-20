@@ -139,7 +139,7 @@ public class FavListAdapter extends RecyclerView.Adapter<FavListAdapter.ListView
                     Intent intent = new Intent(context, MainActivity.class);
                     intent.putExtra("placeID", adapterPosition);
                     context.startActivity(intent);
-
+                    ((FavouriteListActivity) context).finish();
 //                    Toast.makeText(context, "On context click" +favPlaceList.get(listViewHolder.getAdapterPosition()).getPlaceID(), Toast.LENGTH_SHORT).show();
 
                     return true;
