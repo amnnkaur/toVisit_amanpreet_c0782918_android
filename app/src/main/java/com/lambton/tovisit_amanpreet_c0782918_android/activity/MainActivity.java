@@ -302,7 +302,7 @@ public class MainActivity extends AppCompatActivity {
                 String url = getPlaceUrl(userLocation.latitude, userLocation.longitude, "school");
                 showNearbyPlaces(url);
 
-                Toast.makeText(MainActivity.this, "school", Toast.LENGTH_SHORT).show();
+//                Toast.makeText(MainActivity.this, "school", Toast.LENGTH_SHORT).show();
             }
         });
     }

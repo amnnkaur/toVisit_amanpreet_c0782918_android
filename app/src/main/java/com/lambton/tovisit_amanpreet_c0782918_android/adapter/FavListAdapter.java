@@ -69,8 +69,8 @@ public class FavListAdapter extends RecyclerView.Adapter<FavListAdapter.ListView
 
         if (!favPlace.isStatus()) {
             holder.address.setText(favPlace.getAddress());
-            holder.latitude.setText(String.valueOf(favPlace.getLatitude()));
-            holder.longitude.setText(String.valueOf(favPlace.getLongitude()));
+            holder.latitude.setText("Latitude is: " +String.format("%.2f",favPlace.getLatitude()));
+            holder.longitude.setText("Longitude is: "  +String.format("%.2f",favPlace.getLongitude()));
 
             Calendar calendar = Calendar.getInstance();
             SimpleDateFormat simpleDateFormat = new SimpleDateFormat("EEE, MMM d, yyyy");
