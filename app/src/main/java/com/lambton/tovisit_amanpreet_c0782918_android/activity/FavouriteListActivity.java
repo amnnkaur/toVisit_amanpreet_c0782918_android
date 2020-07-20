@@ -48,12 +48,11 @@ public class FavouriteListActivity extends AppCompatActivity {
         rvFavList.setLayoutManager(new LinearLayoutManager(this));
         rvFavList.addItemDecoration(new DividerItemDecoration(this,
                 DividerItemDecoration.VERTICAL));
-        rvFavList.setAdapter(favListAdapter);
+//        rvFavList.setAdapter(favListAdapter);
 
         favPlaceList = new ArrayList<>();
-        favPlaceRoomDB = FavPlaceRoomDB.getINSTANCE(this);
 
-        loadPlaces();
+        favPlaceRoomDB = FavPlaceRoomDB.getINSTANCE(this);
 
         ItemTouchHelper.SimpleCallback simpleItemTouchCallback = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {
             @Override
@@ -66,15 +65,35 @@ public class FavouriteListActivity extends AppCompatActivity {
 
                 if (direction == ItemTouchHelper.RIGHT) {
 
-                    Intent intent = new Intent(FavouriteListActivity.this, MoveToActivity.class);
-                    intent.putExtra("placeID", favPlaceList.get(position).getPlaceID());
+                    String address = favPlaceList.get(position).getAddress();
+                    int id = favPlaceList.get(position).getPlaceID();
+                    double lat = favPlaceList.get(position).getLatitude();
+                    double longitude = favPlaceList.get(position).getLongitude();
+                    String date = favPlaceList.get(position).getDate();
 
-                    startActivity(intent);
+//                    favPlaceRoomDB.favPlaceDao().updatePlace(favPlaceList.get(position).getPlaceID(),favPlaceList.get(position).getLatitude(),favPlaceList.get(position).getLongitude(),favPlaceList.get(position).getDate(),favPlaceList.get(position).getAddress(),true);
+
+//                  favPlaceList.clear();
+//                  favListAdapter.getItemCount();
+
+                    favPlaceRoomDB.favPlaceDao().deletePlace(favPlaceList.get(position).getPlaceID());
+//                    favPlaceList.remove(position);
+
+                    favListAdapter.notifyItemRemoved(position);
+
+                    favListAdapter.notifyDataSetChanged();
+
+                    favPlaceRoomDB.favPlaceDao().insertPlace(new FavPlace(lat,longitude,date,address,true));
+                    startActivity(new Intent(FavouriteListActivity.this,MoveToActivity.class));
                     finish();
-
-                    favPlaceList.remove(position);
-                    loadPlaces();
+//                    Intent intent = new Intent(FavouriteListActivity.this, MoveToActivity.class);
+//                    intent.putExtra("placeID", favPlaceList.get(position).getPlaceID());
+//                    startActivity(intent);
 //                    Toast.makeText(FavouriteListActivity.this, favPlaceList.get(position).getAddress(), Toast.LENGTH_SHORT).show();
+
+
+//                    favPlaceList.remove(position);
+//                    loadPlaces();
 
                 } else if (direction == ItemTouchHelper.LEFT) {
 
@@ -86,6 +105,7 @@ public class FavouriteListActivity extends AppCompatActivity {
         ItemTouchHelper itemTouchHelper = new ItemTouchHelper(simpleItemTouchCallback);
         itemTouchHelper.attachToRecyclerView(rvFavList);
 
+        loadPlaces();
     }
 
     private void deletePlace(final int position) {
@@ -162,7 +182,7 @@ public class FavouriteListActivity extends AppCompatActivity {
 
     private void loadPlaces() {
 
-        favPlaceList = favPlaceRoomDB.favPlaceDao().getAllPlaces();
+        favPlaceList = favPlaceRoomDB.favPlaceDao().getSelectedStatusPlaces(false);
 
         favListAdapter = new FavListAdapter(this,R.layout.item_place, favPlaceList);
         rvFavList.setAdapter(favListAdapter);

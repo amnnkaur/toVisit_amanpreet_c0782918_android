@@ -75,9 +75,12 @@ public class MainActivity extends AppCompatActivity {
     private LatLng userLocation;
     FavPlaceRoomDB favPlaceRoomDB;
     FavPlace favPlace;
+    List<FavPlace> favPlaceList;
 
     FragmentManager fragmentManager;
     MapsFragment fragment;
+
+    int placeID;
 
     FloatingActionButton fab;
     ChipGroup chipGroupType;
@@ -96,6 +99,8 @@ public class MainActivity extends AppCompatActivity {
 
         getSupportActionBar().hide();
 
+
+
         fragmentManager = getSupportFragmentManager();
         fragment = new MapsFragment();
         fragmentManager.beginTransaction()
@@ -110,8 +115,8 @@ public class MainActivity extends AppCompatActivity {
         optionsMapType();
         typesOfPlaces();
         goToDirection();
-
         searchClicked();
+
     }
 
     private void searchClicked() {
@@ -395,10 +400,9 @@ public class MainActivity extends AppCompatActivity {
         Calendar cal = Calendar.getInstance();
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("EEE, MMM dd yyyy");
         String addedDate = simpleDateFormat.format(cal.getTime());
-
-        favPlaceRoomDB.favPlaceDao().updatePlace(fragment.placeID, fragment.destLocation.latitude, fragment.destLocation.longitude, fragment.placeName);
+        favPlaceRoomDB.favPlaceDao().updatePlace(fragment.placeID, fragment.addedLocation.latitude, fragment.addedLocation.longitude,addedDate, fragment.placeName,false);
         finish();
-//                Toast.makeText(MainActivity.this, "info:" +fragment.placeID +fragment.placeName +fragment.destLocation.latitude, Toast.LENGTH_SHORT).show();
+//      Toast.makeText(MainActivity.this, "info:" +fragment.placeID +fragment.placeName +fragment.destLocation.latitude, Toast.LENGTH_SHORT).show();
 
     }
 

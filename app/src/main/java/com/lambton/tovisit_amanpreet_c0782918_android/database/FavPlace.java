@@ -6,8 +6,10 @@ import androidx.room.Dao;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 
+import java.io.Serializable;
+
 @Entity(tableName = "place")
-public class FavPlace {
+public class FavPlace implements Serializable {
 
     @PrimaryKey(autoGenerate = true)
     private int placeID;

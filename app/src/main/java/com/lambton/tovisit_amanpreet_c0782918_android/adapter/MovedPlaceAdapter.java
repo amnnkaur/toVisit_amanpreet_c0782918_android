@@ -61,18 +61,20 @@ public class MovedPlaceAdapter extends RecyclerView.Adapter<MovedPlaceAdapter.Li
     public void onBindViewHolder(@NonNull final ListViewHolder holder, int position) {
 
         final FavPlace favPlace = movedPlaces.get(position);
-        holder.address.setText(favPlace.getAddress());
-        holder.latitude.setText(String.valueOf(favPlace.getLatitude()));
-        holder.longitude.setText(String.valueOf(favPlace.getLongitude()));
 
-        Calendar calendar = Calendar.getInstance();
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("EEE, MMM d, yyyy");
-        String addDate = simpleDateFormat.format(calendar.getTime());
+        if (favPlace.isStatus()) {
+            holder.address.setText(favPlace.getAddress());
+            holder.latitude.setText(String.valueOf(favPlace.getLatitude()));
+            holder.longitude.setText(String.valueOf(favPlace.getLongitude()));
 
-        holder.date.setText(addDate);
-        holder.itemView.setBackgroundColor(Color.GREEN);
+            Calendar calendar = Calendar.getInstance();
+            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("EEE, MMM d, yyyy");
+            String addDate = simpleDateFormat.format(calendar.getTime());
 
+            holder.date.setText(addDate);
+            holder.itemView.setBackgroundColor(Color.GREEN);
 
+        }
     }
 
     @Override

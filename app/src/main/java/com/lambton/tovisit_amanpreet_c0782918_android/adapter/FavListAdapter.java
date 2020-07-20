@@ -17,6 +17,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.lambton.tovisit_amanpreet_c0782918_android.R;
 import com.lambton.tovisit_amanpreet_c0782918_android.activity.FavouriteListActivity;
 import com.lambton.tovisit_amanpreet_c0782918_android.activity.MainActivity;
+import com.lambton.tovisit_amanpreet_c0782918_android.activity.MoveToActivity;
 import com.lambton.tovisit_amanpreet_c0782918_android.database.FavPlace;
 import com.lambton.tovisit_amanpreet_c0782918_android.database.FavPlaceRoomDB;
 
@@ -47,8 +48,6 @@ public class FavListAdapter extends RecyclerView.Adapter<FavListAdapter.ListView
     }
 
 
-
-
     @NonNull
     @Override
     public ListViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -65,17 +64,28 @@ public class FavListAdapter extends RecyclerView.Adapter<FavListAdapter.ListView
     public void onBindViewHolder(@NonNull final ListViewHolder holder, int position) {
 
         final FavPlace favPlace = favPlaceList.get(position);
-        holder.address.setText(favPlace.getAddress());
-        holder.latitude.setText(String.valueOf(favPlace.getLatitude()));
-        holder.longitude.setText(String.valueOf(favPlace.getLongitude()));
 
-        Calendar calendar = Calendar.getInstance();
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("EEE, MMM d, yyyy");
-        String addDate = simpleDateFormat.format(calendar.getTime());
+        if (!favPlace.isStatus()) {
+            holder.address.setText(favPlace.getAddress());
+            holder.latitude.setText(String.valueOf(favPlace.getLatitude()));
+            holder.longitude.setText(String.valueOf(favPlace.getLongitude()));
 
-        holder.date.setText(addDate);
+            Calendar calendar = Calendar.getInstance();
+            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("EEE, MMM d, yyyy");
+            String addDate = simpleDateFormat.format(calendar.getTime());
 
+            holder.date.setText(addDate);
 
+            holder.itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    Intent intent = new Intent(context, MainActivity.class);
+                    intent.putExtra("favPlace",favPlace);
+                    context.startActivity(intent);
+                }
+            });
+
+        }
     }
 
     @Override
@@ -128,14 +138,6 @@ public class FavListAdapter extends RecyclerView.Adapter<FavListAdapter.ListView
                 }
             });
 
-            contextMenu.add("Mark as Visited").setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
-                @Override
-                public boolean onMenuItemClick(MenuItem menuItem) {
-
-
-                    return true;
-                }
-            });
 
         }
     }

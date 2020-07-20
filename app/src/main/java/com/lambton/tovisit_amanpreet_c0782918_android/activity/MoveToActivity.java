@@ -56,7 +56,7 @@ public class MoveToActivity extends AppCompatActivity {
 
     private void loadPlaces() {
 
-        favPlaceList = favPlaceRoomDB.favPlaceDao().getSelectedPlaces(placeID);
+        favPlaceList = favPlaceRoomDB.favPlaceDao().getAllPlaces();
 
         movedPlaceAdapter = new MovedPlaceAdapter(this,R.layout.item_place, favPlaceList);
 
@@ -68,5 +68,7 @@ public class MoveToActivity extends AppCompatActivity {
     public void onBackPressed() {
         Intent intent = new Intent(MoveToActivity.this,FavouriteListActivity.class);
         startActivity(intent);
+        finish();
+
     }
 }

@@ -18,12 +18,15 @@ public interface FavPlaceDao {
     @Query("DELETE FROM place WHERE placeID = :id")
     int deletePlace(int id);
 
-    @Query("UPDATE place SET latitude = :latitude, longitude= :longitude, address = :address WHERE placeID = :id")
-    int updatePlace(int id, Double latitude, Double longitude, String address);
+    @Query("UPDATE place SET latitude = :latitude, longitude= :longitude, date = :date, address = :address, status = :status WHERE placeID = :id")
+    int updatePlace(int id, Double latitude, Double longitude, String date, String address, boolean status);
 
     @Query("SELECT * FROM place")
     List<FavPlace> getAllPlaces();
 
     @Query("SELECT * FROM place WHERE placeID = :id")
     List<FavPlace> getSelectedPlaces(int id);
+
+    @Query("SELECT * FROM place WHERE status = :status ")
+    List<FavPlace> getSelectedStatusPlaces(boolean status);
 }
