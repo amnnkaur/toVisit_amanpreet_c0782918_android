@@ -52,7 +52,7 @@ import javax.xml.transform.sax.TemplatesHandler;
 
 import static android.app.Activity.RESULT_OK;
 
-public class MapsFragment extends Fragment implements GoogleMap.OnMarkerDragListener, GoogleMap.OnMarkerClickListener {
+public class MapsFragment extends Fragment implements GoogleMap.OnMarkerDragListener {
 
     private static final String TAG = "MapsFragment";
 
@@ -120,7 +120,7 @@ public class MapsFragment extends Fragment implements GoogleMap.OnMarkerDragList
 
             mMap = googleMap;
             mMap.setOnMarkerDragListener(MapsFragment.this);
-            mMap.setOnMarkerClickListener(MapsFragment.this);
+//            mMap.setOnMarkerClickListener(MapsFragment.this);
             mMap.setMyLocationEnabled(true);
             mMap.getUiSettings().setZoomControlsEnabled(true);
 
@@ -156,6 +156,38 @@ public class MapsFragment extends Fragment implements GoogleMap.OnMarkerDragList
                     setMarker(destLocation);
                 }
             });
+
+                mMap.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
+                    @Override
+                    public void onInfoWindowClick(final Marker marker) {
+
+                        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+
+                        builder.setMessage("Do you want to add the place in Favourites");
+                        builder.setCancelable(true);
+                        builder.setPositiveButton("YES", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+
+                                onMarkerClick = true;
+                                addToFavPlace(marker);
+                                startActivityForResult(new Intent(getActivity(),FavouriteListActivity.class),1);
+
+                            }
+                        });
+                        builder.setNegativeButton("NO", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.cancel();
+                                onMarkerClick = false;
+                            }
+                        });
+
+                        AlertDialog alertDialog = builder.create();
+                        alertDialog.show();
+
+                    }
+                });
 
         }
     };
@@ -359,36 +391,36 @@ public class MapsFragment extends Fragment implements GoogleMap.OnMarkerDragList
         }
     }
 
-    @Override
-    public boolean onMarkerClick(final Marker marker) {
-
-        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-
-        builder.setMessage("Do you want to add the place in Favourites");
-        builder.setCancelable(true);
-        builder.setPositiveButton("YES", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-
-                onMarkerClick = true;
-                addToFavPlace(marker);
-                startActivityForResult(new Intent(getActivity(),FavouriteListActivity.class),1);
-
-            }
-        });
-        builder.setNegativeButton("NO", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.cancel();
-                onMarkerClick = false;
-            }
-        });
-
-        AlertDialog alertDialog = builder.create();
-        alertDialog.show();
-
-        return false;
-    }
+//    @Override
+//    public boolean onMarkerClick(final Marker marker) {
+//
+//        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+//
+//        builder.setMessage("Do you want to add the place in Favourites");
+//        builder.setCancelable(true);
+//        builder.setPositiveButton("YES", new DialogInterface.OnClickListener() {
+//            @Override
+//            public void onClick(DialogInterface dialog, int which) {
+//
+//                onMarkerClick = true;
+//                addToFavPlace(marker);
+//                startActivityForResult(new Intent(getActivity(),FavouriteListActivity.class),1);
+//
+//            }
+//        });
+//        builder.setNegativeButton("NO", new DialogInterface.OnClickListener() {
+//            @Override
+//            public void onClick(DialogInterface dialog, int which) {
+//                dialog.cancel();
+//                onMarkerClick = false;
+//            }
+//        });
+//
+//        AlertDialog alertDialog = builder.create();
+//        alertDialog.show();
+//
+//        return false;
+//    }
 
 }
 

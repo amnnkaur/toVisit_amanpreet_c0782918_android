@@ -83,7 +83,7 @@ public class MovedPlaceAdapter extends RecyclerView.Adapter<MovedPlaceAdapter.Li
     }
 
     public void loadPlaces() {
-        movedPlaces = favPlaceRoomDB.favPlaceDao().getAllPlaces();
+        movedPlaces = favPlaceRoomDB.favPlaceDao().getSelectedStatusPlaces(true);
         notifyDataSetChanged();
 
     }

@@ -101,7 +101,7 @@ public class FavListAdapter extends RecyclerView.Adapter<FavListAdapter.ListView
 
     public void loadPlaces() {
 
-        favPlaceList= favPlaceRoomDB.favPlaceDao().getAllPlaces();
+        favPlaceList= favPlaceRoomDB.favPlaceDao().getSelectedStatusPlaces(false);
         notifyDataSetChanged();
 
     }
