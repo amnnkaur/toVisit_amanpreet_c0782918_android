@@ -3,6 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:padding="10dp"
+    android:background="#D3A89B"
     android:orientation="horizontal">
 
     <LinearLayout
@@ -17,7 +18,7 @@
             android:layout_height="wrap_content"
             android:text="Address"
             android:textStyle="bold"
-            android:textColor="#1B2631"
+            android:textColor="#3B3D40"
             android:textAppearance="@style/TextAppearance.AppCompat.Large" />
 
         <TextView
@@ -25,7 +26,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Latitude"
-            android:textColor="#1B2631"
+            android:textColor="#3B3D40"
             android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
 
         <TextView
@@ -33,7 +34,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Longitude"
-            android:textColor="#1B2631"
+            android:textColor="#3B3D40"
             android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
 
         <TextView
@@ -41,7 +42,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Date"
-            android:textColor="#1B2631"
+            android:textColor="#3B3D40"
             android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
 
     </LinearLayout>
