@@ -67,6 +67,8 @@ public class MapsFragment extends Fragment implements GoogleMap.OnMarkerDragList
     List<FavPlace> favPlaceList;
     GestureDetector gestureDetector;
 
+    public static boolean flagEdit = false;
+
     public GoogleMap getmMap() {
         return mMap;
     }
@@ -77,7 +79,7 @@ public class MapsFragment extends Fragment implements GoogleMap.OnMarkerDragList
 
     LatLng destLocation;
     Location destination;
-    Double dest_lat, dest_lng;
+    static double dest_lat, dest_lng;
     boolean onMarkerClick = false;
 
     private OnMapReadyCallback callback = new OnMapReadyCallback() {
@@ -94,7 +96,7 @@ public class MapsFragment extends Fragment implements GoogleMap.OnMarkerDragList
         @Override
         public void onMapReady(final GoogleMap googleMap) {
 
-            placeID = getActivity().getIntent().getIntExtra("placeID", 0);
+//            placeID = getActivity().getIntent().getIntExtra("placeID", 0);
             favPlaceList = new ArrayList<>();
 
             favPlace = (FavPlace) getActivity().getIntent().getSerializableExtra("favPlace");
@@ -112,6 +114,16 @@ public class MapsFragment extends Fragment implements GoogleMap.OnMarkerDragList
             mMap.setOnMarkerClickListener(MapsFragment.this);
             mMap.setMyLocationEnabled(true);
             mMap.getUiSettings().setZoomControlsEnabled(true);
+
+            if (flagEdit){
+                MarkerOptions markerOptions = new MarkerOptions()
+                        .position(new LatLng(dest_lat,dest_lng))
+                        .title("favPlaceCall.get(0).getAddress()")
+                        .snippet("favPlaceCall.get(0).getDate()")
+                        .draggable(true);
+                mMap.addMarker(markerOptions);
+                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(dest_lat,dest_lng),15));
+            }
 
                 for (FavPlace places : favPlaceList) {
                     if (places.getPlaceID() == placeID) {
@@ -244,6 +256,30 @@ public class MapsFragment extends Fragment implements GoogleMap.OnMarkerDragList
         }
     }
 
+    public void setEditMarker(LatLng editlatlng){
+        SupportMapFragment mapFragment =
+                (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map);
+
+        if (mapFragment != null) {
+            mapFragment.getMapAsync(callback);
+        }
+
+            if (mMap != null) {
+                LatLng latLng = new LatLng(editlatlng.latitude, editlatlng.longitude);
+//                CameraPosition cameraPosition = CameraPosition.builder()
+//                        .target(latLng)
+//                        .zoom(13)
+//                        .bearing(0).build();
+                MarkerOptions markerOptions = new MarkerOptions()
+                        .position(latLng)
+                        .title("favPlaceCall.get(0).getAddress()")
+                        .snippet("favPlaceCall.get(0).getDate()")
+                        .draggable(true);
+                mMap.addMarker(markerOptions);
+                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng,15));
+            }
+
+    }
 
     public void getDestination(IPassData callback) {
         callback.destinationSelected(destination, mMap);
@@ -288,6 +324,13 @@ public class MapsFragment extends Fragment implements GoogleMap.OnMarkerDragList
 
     @Override
     public void onMarkerDragEnd(Marker marker) {
+
+        mMap.clear();
+
+        MarkerOptions markerOptions = new MarkerOptions().position(marker.getPosition())
+                .title("Your dragged location").draggable(true);
+        mMap.addMarker(markerOptions);
+
         addedLocation = new LatLng(marker.getPosition().latitude, marker.getPosition().longitude);
         placeName = locationName(marker);
 

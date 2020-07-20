@@ -35,6 +35,8 @@ public class FavListAdapter extends RecyclerView.Adapter<FavListAdapter.ListView
     FavPlaceRoomDB favPlaceRoomDB;
     MainActivity mainActivity;
 
+    public int adapterPosition;
+
     ListViewHolder listViewHolder;
 
     public FavListAdapter(Context context, int resource, List<FavPlace> favPlaces) {
@@ -76,12 +78,16 @@ public class FavListAdapter extends RecyclerView.Adapter<FavListAdapter.ListView
 
             holder.date.setText(addDate);
 
-            holder.itemView.setOnClickListener(new View.OnClickListener() {
+            holder.itemView.setOnLongClickListener(new View.OnLongClickListener() {
                 @Override
-                public void onClick(View view) {
-                    Intent intent = new Intent(context, MainActivity.class);
-                    intent.putExtra("favPlace",favPlace);
-                    context.startActivity(intent);
+                public boolean onLongClick(View view) {
+
+//                    Toast.makeText(context, "on long click" +favPlace.getPlaceID(), Toast.LENGTH_SHORT).show();
+
+                    adapterPosition = favPlace.getPlaceID();
+
+
+                    return false;
                 }
             });
 
@@ -121,18 +127,20 @@ public class FavListAdapter extends RecyclerView.Adapter<FavListAdapter.ListView
         @Override
         public void onCreateContextMenu(final ContextMenu contextMenu, View view, ContextMenu.ContextMenuInfo contextMenuInfo) {
 
-            final int position = listViewHolder.getAdapterPosition();
+          int position = listViewHolder.getAdapterPosition();
 
             contextMenu.add("Edit Location").setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
                 @Override
                 public boolean onMenuItemClick(MenuItem menuItem) {
 
 
+                    MainActivity.EDIT_CALL = true;
+
                     Intent intent = new Intent(context, MainActivity.class);
-                    intent.putExtra("placeID", favPlaceList.get(position).getPlaceID());
+                    intent.putExtra("placeID", adapterPosition);
                     context.startActivity(intent);
 
-//                    Toast.makeText(context, "On click", Toast.LENGTH_SHORT).show();
+//                    Toast.makeText(context, "On context click" +favPlaceList.get(listViewHolder.getAdapterPosition()).getPlaceID(), Toast.LENGTH_SHORT).show();
 
                     return true;
                 }

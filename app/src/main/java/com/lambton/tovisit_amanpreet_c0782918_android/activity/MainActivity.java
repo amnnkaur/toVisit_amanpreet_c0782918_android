@@ -66,6 +66,7 @@ public class MainActivity extends AppCompatActivity {
     private static final long UPDATE_INTERVAL = 5000;
     private static final long FASTEST_INTERVAL = 3000;
     private static final int RADIUS = 1500;
+    public static boolean EDIT_CALL = false;
 
     // use the fused location provider client
     private FusedLocationProviderClient mClient;
@@ -76,6 +77,12 @@ public class MainActivity extends AppCompatActivity {
     FavPlaceRoomDB favPlaceRoomDB;
     FavPlace favPlace;
     List<FavPlace> favPlaceList;
+
+    int callID;
+
+    double latCall;
+    double lngCall;
+    List<FavPlace> favPlaceCall;
 
     FragmentManager fragmentManager;
     MapsFragment fragment;
@@ -99,7 +106,7 @@ public class MainActivity extends AppCompatActivity {
 
         getSupportActionBar().hide();
 
-
+        favPlaceRoomDB = FavPlaceRoomDB.getINSTANCE(this);
 
         fragmentManager = getSupportFragmentManager();
         fragment = new MapsFragment();
@@ -117,6 +124,40 @@ public class MainActivity extends AppCompatActivity {
         goToDirection();
         searchClicked();
 
+        editCalled();
+
+
+    }
+
+    private void editCalled() {
+
+        if (EDIT_CALL){
+            callID = getIntent().getIntExtra("placeID",-1);
+//            Toast.makeText(this, "call id " +callID, Toast.LENGTH_SHORT).show();
+
+            favPlaceCall = favPlaceRoomDB.favPlaceDao().getSelectedPlaces(callID);
+
+            if (favPlaceCall.size() != 0){
+
+                latCall = favPlaceCall.get(0).getLatitude();
+                lngCall = favPlaceCall.get(0).getLongitude();
+
+                Toast.makeText(this, "lat" +latCall + ","+ lngCall, Toast.LENGTH_SHORT).show();
+
+                MarkerOptions markerOptions = new MarkerOptions()
+                        .position(new LatLng(latCall,lngCall))
+                        .title(favPlaceCall.get(0).getAddress())
+                        .snippet(favPlaceCall.get(0).getDate())
+                       .draggable(true);
+
+                fragment.flagEdit = true;
+                fragment.dest_lat = latCall;
+                fragment.dest_lng = lngCall;
+
+//                fragment.mMap.addMarker(markerOptions);
+//                fragment.setEditMarker(new LatLng(latCall,lngCall));
+            }
+        }
     }
 
     private void searchClicked() {
@@ -357,7 +398,9 @@ public class MainActivity extends AppCompatActivity {
                 if (location != null) {
                     userLocation = new LatLng(location.getLatitude(), location.getLongitude());
 //                Log.d(TAG, "onLocationResult: " + location);
-                    fragment.setHomeMarker(location);
+                    if (!EDIT_CALL) {
+                        fragment.setHomeMarker(location);
+                    }
                 }
             }
         };
@@ -395,14 +438,18 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onBackPressed() {
 
-        startActivity(new Intent(MainActivity.this, FavouriteListActivity.class));
-
-        Calendar cal = Calendar.getInstance();
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("EEE, MMM dd yyyy");
-        String addedDate = simpleDateFormat.format(cal.getTime());
-        favPlaceRoomDB.favPlaceDao().updatePlace(fragment.placeID, fragment.addedLocation.latitude, fragment.addedLocation.longitude,addedDate, fragment.placeName,false);
-        finish();
+//        startActivity(new Intent(MainActivity.this, FavouriteListActivity.class));
+//
+//        Calendar cal = Calendar.getInstance();
+//        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("EEE, MMM dd yyyy");
+//        String addedDate = simpleDateFormat.format(cal.getTime());
+//
+//        favPlaceRoomDB.favPlaceDao().updatePlace(fragment.placeID, fragment.addedLocation.latitude, fragment.addedLocation.longitude,addedDate, fragment.placeName,false);
+//        finish();
 //      Toast.makeText(MainActivity.this, "info:" +fragment.placeID +fragment.placeName +fragment.destLocation.latitude, Toast.LENGTH_SHORT).show();
+
+
+        super.onBackPressed();
 
     }
 
